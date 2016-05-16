@@ -33,7 +33,8 @@ module ActsAsQueueable
                              .limit(1)
                              .first
 
-          queueing.queueable == self if queueing
+          return false unless queueing
+          queueing.queueable == self
         end
       end
     end
