@@ -14,21 +14,26 @@ module ActsAsQueueable
           false
         end
 
-        def in_queue_for?(queuer, index = nil, queue_name = DEFAULT_QUEUE_NAME)
+        def in_queue_for?(queuer, queue_name = DEFAULT_QUEUE_NAME)
           return false if queues.empty?
 
-          queue = Queue.includes(:queueings).find_by(name: queue_name)
-          queueings = queuer.queueings
+          queueings = Queueing.includes(:queueable)
+                              .joins(:queue)
+                              .where('queues.name = ?', queue_name)
+                              .where(queuer: queuer)
 
-          if index
-            queueings[index].queueable == self
-          else
-            queueings.any? { |queueing| queueings.map(&:queueable).include?(queueing.queueable) }
-          end
+          queueings.any? { |queueing| queueings.map!(&:queueable).include?(self) }
         end
 
         def first_in_queue_for?(queuer, queue_name = DEFAULT_QUEUE_NAME)
-          in_queue_for?(queuer, 0)
+          queueing = Queueing.includes(:queueable)
+                             .joins(:queue)
+                             .where('queues.name = ?', queue_name)
+                             .where(queuer: queuer)
+                             .limit(1)
+                             .first
+
+          queueing.queueable == self if queueing
         end
       end
     end

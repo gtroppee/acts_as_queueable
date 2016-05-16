@@ -33,11 +33,11 @@ module ActsAsQueueable
 
       def enqueue(queueable, queue_name = DEFAULT_QUEUE_NAME)
         queue = Queue.find_or_create_by_name(queue_name)
-        Queueing.first_or_create(queueable: queueable, queuer: self, queue: queue)
+        Queueing.create(queueable: queueable, queuer: self, queue: queue)
       end
 
       def dequeue(queueable, queue_name = DEFAULT_QUEUE_NAME)
-        queue   = Queue.find_or_create_by_name(queue_name)
+        queue = Queue.find_or_create_by_name(queue_name)
         Queueing.where(queueable: queueable, queuer: self, queue: queue).destroy_all
       end
 
