@@ -22,7 +22,7 @@ module ActsAsQueueable
                               .where('queues.name = ?', queue_name)
                               .where(queuer: queuer)
 
-          queueings.any? { |queueing| queueings.map!(&:queueable).include?(self) }
+          queueings.flat_map(&:queueable).any? { |queueable| queueable == self }
         end
 
         def first_in_queue_for?(queuer, queue_name = DEFAULT_QUEUE_NAME)
